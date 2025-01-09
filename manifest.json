@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Tabberfox",
+  "version": "1.0",
+  "description": "Save and restore browser windows with custom names for better tab management",
+  "permissions": ["tabs", "storage"],
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "48": "icons/tabberfox-48.png",
+      "96": "icons/tabberfox-96.png"
+    }
+  },
+  "icons": {
+    "48": "icons/tabberfox-48.png",
+    "96": "icons/tabberfox-96.png"
+  }
+}
