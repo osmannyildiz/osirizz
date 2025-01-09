@@ -47,7 +47,7 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: 8px 12px;
   background-color: #f9f9fa;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -55,12 +55,39 @@ button:hover {
 
 .window-name {
   font-weight: 500;
+  flex-grow: 1;
+  margin-right: 12px;
+}
+
+.window-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #5c5c5c;
+}
+
+.icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.icon-button .material-icons {
+  font-size: 20px;
 }
 
 .restore-btn {
-  background-color: #2ac3a2;
+  color: #2ac3a2;
 }
 
-.restore-btn:hover {
-  background-color: #008787;
+.delete-btn {
+  color: #d70022;
 }

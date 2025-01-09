@@ -71,17 +71,51 @@ async function loadSavedWindows() {
       nameSpan.className = "window-name";
       nameSpan.textContent = name;
 
+      const actionsDiv = document.createElement("div");
+      actionsDiv.className = "window-actions";
+
       const restoreButton = document.createElement("button");
-      restoreButton.className = "restore-btn";
-      restoreButton.textContent = "Restore";
+      restoreButton.className = "icon-button restore-btn";
+      restoreButton.innerHTML = '<span class="material-icons">restore</span>';
+      restoreButton.title = "Restore window";
       restoreButton.onclick = () => restoreWindow(name, data);
 
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "icon-button delete-btn";
+      deleteButton.innerHTML = '<span class="material-icons">delete</span>';
+      deleteButton.title = "Delete window";
+      deleteButton.onclick = () => deleteWindow(name);
+
+      actionsDiv.appendChild(restoreButton);
+      actionsDiv.appendChild(deleteButton);
+
       windowItem.appendChild(nameSpan);
-      windowItem.appendChild(restoreButton);
+      windowItem.appendChild(actionsDiv);
       windowsList.appendChild(windowItem);
     });
   } catch (error) {
     console.error("Error loading saved windows:", error);
+  }
+}
+
+async function deleteWindow(windowName) {
+  try {
+    // Get existing saved windows
+    const { savedWindows = {} } = await browser.storage.local.get(
+      "savedWindows"
+    );
+
+    // Remove the window
+    delete savedWindows[windowName];
+
+    // Update storage
+    await browser.storage.local.set({ savedWindows });
+
+    // Refresh the displayed list
+    loadSavedWindows();
+  } catch (error) {
+    console.error("Error deleting window:", error);
+    alert("Error deleting window");
   }
 }
 
