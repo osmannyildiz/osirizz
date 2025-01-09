@@ -45,13 +45,6 @@ body {
   border: 1px solid #b7dfb9;
 }
 
-#window-name {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
 button {
   padding: 8px 12px;
   background-color: #0060df;
@@ -64,6 +57,12 @@ button {
 
 button:hover {
   background-color: #003eaa;
+}
+
+#save-window-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .saved-windows {

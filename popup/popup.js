@@ -4,22 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add event listener for save button
   document
-    .getElementById("save-window")
+    .getElementById("save-window-btn")
     .addEventListener("click", saveCurrentWindow);
-
-  const windowNameInput = document.getElementById("window-name");
-
-  // Add input event listener to clear message when typing
-  windowNameInput.addEventListener("input", () => {
-    clearMessage();
-  });
-
-  // Add keydown event listener for Enter key
-  windowNameInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      saveCurrentWindow();
-    }
-  });
 });
 
 function showMessage(text, type) {
@@ -35,15 +21,8 @@ function clearMessage() {
 }
 
 async function saveCurrentWindow() {
-  const windowName = document.getElementById("window-name").value.trim();
-
-  if (!windowName) {
-    showMessage("Please enter a window name", "error");
-    return;
-  }
-
   try {
-    // Get current window
+    // Get current window with tabs
     const currentWindow = await browser.windows.getCurrent({ populate: true });
 
     // Get tab information (excluding about: URLs)
@@ -58,6 +37,9 @@ async function saveCurrentWindow() {
       showMessage("Cannot save window: No valid URLs found", "error");
       return;
     }
+
+    // Use first tab's title as window name
+    const windowName = tabsData[0].title;
 
     // Get existing saved windows
     const { savedWindows = {} } = await browser.storage.local.get(
