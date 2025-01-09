@@ -20,11 +20,18 @@ async function saveCurrentWindow() {
     // Get current window
     const currentWindow = await browser.windows.getCurrent({ populate: true });
 
-    // Get tab information
-    const tabsData = currentWindow.tabs.map((tab) => ({
-      url: tab.url,
-      title: tab.title,
-    }));
+    // Get tab information (excluding about: URLs)
+    const tabsData = currentWindow.tabs
+      .filter((tab) => !tab.url.startsWith("about:"))
+      .map((tab) => ({
+        url: tab.url,
+        title: tab.title,
+      }));
+
+    if (tabsData.length === 0) {
+      alert("Cannot save window: No valid URLs found");
+      return;
+    }
 
     // Get existing saved windows
     const { savedWindows = {} } = await browser.storage.local.get(
