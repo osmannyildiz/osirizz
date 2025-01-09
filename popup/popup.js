@@ -6,13 +6,39 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("save-window")
     .addEventListener("click", saveCurrentWindow);
+
+  const windowNameInput = document.getElementById("window-name");
+
+  // Add input event listener to clear message when typing
+  windowNameInput.addEventListener("input", () => {
+    clearMessage();
+  });
+
+  // Add keydown event listener for Enter key
+  windowNameInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      saveCurrentWindow();
+    }
+  });
 });
+
+function showMessage(text, type) {
+  const messageEl = document.getElementById("message");
+  messageEl.textContent = text;
+  messageEl.className = `message ${type}`;
+}
+
+function clearMessage() {
+  const messageEl = document.getElementById("message");
+  messageEl.textContent = "";
+  messageEl.className = "message";
+}
 
 async function saveCurrentWindow() {
   const windowName = document.getElementById("window-name").value.trim();
 
   if (!windowName) {
-    alert("Please enter a window name");
+    showMessage("Please enter a window name", "error");
     return;
   }
 
@@ -29,7 +55,7 @@ async function saveCurrentWindow() {
       }));
 
     if (tabsData.length === 0) {
-      alert("Cannot save window: No valid URLs found");
+      showMessage("Cannot save window: No valid URLs found", "error");
       return;
     }
 
@@ -51,7 +77,7 @@ async function saveCurrentWindow() {
     await browser.windows.remove(currentWindow.id);
   } catch (error) {
     console.error("Error saving window:", error);
-    alert("Error saving window");
+    showMessage("Error saving window", "error");
   }
 }
 
@@ -95,6 +121,7 @@ async function loadSavedWindows() {
     });
   } catch (error) {
     console.error("Error loading saved windows:", error);
+    showMessage("Error loading saved windows", "error");
   }
 }
 
@@ -115,7 +142,7 @@ async function deleteWindow(windowName) {
     loadSavedWindows();
   } catch (error) {
     console.error("Error deleting window:", error);
-    alert("Error deleting window");
+    showMessage("Error deleting window", "error");
   }
 }
 
@@ -147,6 +174,6 @@ async function restoreWindow(windowName, windowData) {
     loadSavedWindows();
   } catch (error) {
     console.error("Error restoring window:", error);
-    alert("Error restoring window");
+    showMessage("Error restoring window", "error");
   }
 }
