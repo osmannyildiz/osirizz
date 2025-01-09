@@ -6,7 +6,31 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("save-window-btn")
     .addEventListener("click", saveCurrentWindow);
+
+  // Add event listener for open in tab button
+  document
+    .getElementById("open-tab-btn")
+    .addEventListener("click", openInNewTab);
 });
+
+async function openInNewTab() {
+  try {
+    // Get the extension's popup URL
+    const extensionURL = browser.runtime.getURL("popup/popup.html");
+
+    // Create a new tab with the popup URL
+    await browser.tabs.create({
+      url: extensionURL,
+      active: true,
+    });
+
+    // Close the popup
+    window.close();
+  } catch (error) {
+    console.error("Error opening in new tab:", error);
+    showMessage("Error opening in new tab", "error");
+  }
+}
 
 function showMessage(text, type) {
   const messageEl = document.getElementById("message");
