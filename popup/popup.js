@@ -154,12 +154,15 @@ async function restoreWindow(windowName, windowData) {
       url: firstTab.url,
     });
 
-    // Create remaining tabs in the window
+    // Create remaining tabs in the window (discarded until activated)
     const remainingTabs = windowData.tabs.slice(1);
     for (const tab of remainingTabs) {
       await browser.tabs.create({
         windowId: newWindow.id,
         url: tab.url,
+        active: false,
+        discarded: true,
+        title: tab.title,
       });
     }
 
