@@ -1,3 +1,14 @@
+let activeFilter = null;
+
+const colorEmojis = {
+  red: "🔴",
+  orange: "🟠",
+  yellow: "🟡",
+  green: "🟢",
+  blue: "🔵",
+  purple: "🟣",
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   // Load saved windows when popup opens
   loadSavedWindows();
@@ -11,6 +22,29 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("open-tab-btn")
     .addEventListener("click", openInNewTab);
+
+  // Add event listeners for color filters
+  document.querySelectorAll(".color-filter").forEach((button) => {
+    button.addEventListener("click", () => {
+      const color = button.dataset.color;
+      if (activeFilter === color) {
+        // Deactivate filter if clicking active one
+        activeFilter = null;
+        button.classList.remove("active");
+      } else {
+        // Remove active class from previous filter
+        if (activeFilter) {
+          document
+            .querySelector(`.color-filter[data-color="${activeFilter}"]`)
+            .classList.remove("active");
+        }
+        // Activate new filter
+        activeFilter = color;
+        button.classList.add("active");
+      }
+      loadSavedWindows(); // Refresh list with filter
+    });
+  });
 });
 
 async function openInNewTab() {
@@ -95,13 +129,24 @@ async function loadSavedWindows() {
     const windowsList = document.getElementById("windows-list");
     windowsList.innerHTML = "";
 
-    Object.entries(savedWindows).forEach(([name, data]) => {
+    // Filter windows based on active color filter
+    const entries = Object.entries(savedWindows).filter(([name, _]) => {
+      if (!activeFilter) return true;
+      const emoji = colorEmojis[activeFilter];
+      return name.startsWith(emoji);
+    });
+
+    entries.forEach(([name, data]) => {
       const windowItem = document.createElement("div");
       windowItem.className = "window-item";
+
+      const windowInfo = document.createElement("div");
+      windowInfo.className = "window-info";
 
       const nameSpan = document.createElement("span");
       nameSpan.className = "window-name";
       nameSpan.textContent = name;
+      windowInfo.appendChild(nameSpan);
 
       const actionsDiv = document.createElement("div");
       actionsDiv.className = "window-actions";
@@ -121,7 +166,7 @@ async function loadSavedWindows() {
       actionsDiv.appendChild(restoreButton);
       actionsDiv.appendChild(deleteButton);
 
-      windowItem.appendChild(nameSpan);
+      windowItem.appendChild(windowInfo);
       windowItem.appendChild(actionsDiv);
       windowsList.appendChild(windowItem);
     });
