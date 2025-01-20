@@ -99,13 +99,17 @@ async function saveCurrentWindow() {
     // Use first tab's title as window name
     const windowName = tabsData[0].title;
 
+    // Generate unique ID for the window
+    const windowId = crypto.randomUUID();
+
     // Get existing saved windows
     const { savedWindows = {} } = await browser.storage.local.get(
       "savedWindows"
     );
 
     // Save new window data
-    savedWindows[windowName] = {
+    savedWindows[windowId] = {
+      name: windowName,
       tabs: tabsData,
       timestamp: new Date().toISOString(),
     };
@@ -130,13 +134,13 @@ async function loadSavedWindows() {
     windowsList.innerHTML = "";
 
     // Filter windows based on active color filter
-    const entries = Object.entries(savedWindows).filter(([name, _]) => {
+    const entries = Object.entries(savedWindows).filter(([_, data]) => {
       if (!activeFilter) return true;
       const emoji = colorEmojis[activeFilter];
-      return name.startsWith(emoji);
+      return data.name.startsWith(emoji);
     });
 
-    entries.forEach(([name, data]) => {
+    entries.forEach(([id, data]) => {
       const windowItem = document.createElement("div");
       windowItem.className = "window-item";
 
@@ -145,7 +149,7 @@ async function loadSavedWindows() {
 
       const nameSpan = document.createElement("span");
       nameSpan.className = "window-name";
-      nameSpan.textContent = name;
+      nameSpan.textContent = data.name;
       windowInfo.appendChild(nameSpan);
 
       const actionsDiv = document.createElement("div");
@@ -155,13 +159,13 @@ async function loadSavedWindows() {
       restoreButton.className = "icon-button restore-btn";
       restoreButton.innerHTML = '<span class="material-icons">restore</span>';
       restoreButton.title = "Restore window";
-      restoreButton.onclick = () => restoreWindow(name, data);
+      restoreButton.onclick = () => restoreWindow(id, data);
 
       const deleteButton = document.createElement("button");
       deleteButton.className = "icon-button delete-btn";
       deleteButton.innerHTML = '<span class="material-icons">delete</span>';
       deleteButton.title = "Delete window";
-      deleteButton.onclick = () => deleteWindow(name);
+      deleteButton.onclick = () => deleteWindow(id);
 
       actionsDiv.appendChild(restoreButton);
       actionsDiv.appendChild(deleteButton);
@@ -176,7 +180,7 @@ async function loadSavedWindows() {
   }
 }
 
-async function deleteWindow(windowName) {
+async function deleteWindow(windowId) {
   try {
     // Get existing saved windows
     const { savedWindows = {} } = await browser.storage.local.get(
@@ -184,7 +188,7 @@ async function deleteWindow(windowName) {
     );
 
     // Remove the window
-    delete savedWindows[windowName];
+    delete savedWindows[windowId];
 
     // Update storage
     await browser.storage.local.set({ savedWindows });
@@ -197,7 +201,7 @@ async function deleteWindow(windowName) {
   }
 }
 
-async function restoreWindow(windowName, windowData) {
+async function restoreWindow(windowId, windowData) {
   try {
     // Create new window with first tab
     const firstTab = windowData.tabs[0];
@@ -221,7 +225,7 @@ async function restoreWindow(windowName, windowData) {
     const { savedWindows = {} } = await browser.storage.local.get(
       "savedWindows"
     );
-    delete savedWindows[windowName];
+    delete savedWindows[windowId];
     await browser.storage.local.set({ savedWindows });
 
     // Refresh the displayed list
