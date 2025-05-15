@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function openInNewTab() {
   try {
     // Get the extension's popup URL
-    const extensionURL = browser.runtime.getURL("popup/popup.html");
+    const extensionURL = browser.runtime.getURL("ui/popup.html");
 
     // Create a new tab with the popup URL
     await browser.tabs.create({
@@ -202,22 +202,6 @@ async function deleteWindow(windowId) {
 }
 
 async function restoreWindow(windowId, windowData) {
-  // let sendingMessage = browser.runtime.sendMessage({
-  //   type: "restoreWindow",
-  //   windowId: windowId,
-  //   windowData: windowData,
-  // });
-  // sendingMessage.then((result) => {
-  //   console.log("hey sendingMessage result", result);
-  // });
-
-  // let result = await browser.runtime.sendMessage({
-  //   type: "restoreWindow",
-  //   windowId: windowId,
-  //   windowData: windowData,
-  // });
-  // console.log("hey restoreWindow result", result);
-
   await browser.runtime.sendMessage({
     type: "restoreWindow",
     windowId: windowId,

@@ -32,9 +32,11 @@ async function restoreWindow(windowId, windowData) {
 }
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "restoreWindow") {
-    restoreWindow(message.windowId, message.windowData);
+  switch (message.type) {
+    case "restoreWindow":
+      restoreWindow(message.windowId, message.windowData);
+      break;
+    default:
+      console.error("Unknown message type:", message.type);
   }
-
-  // sendResponse("done");
 });

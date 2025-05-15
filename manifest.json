@@ -1,19 +1,20 @@
 {
   "manifest_version": 2,
-  "name": "Tabberfox",
-  "version": "1.0",
-  "description": "Save and restore browser windows with custom names for better tab management",
-  "permissions": ["tabs", "storage"],
+  "name": "Osirizz",
+  "version": "0.1",
+  "description": "Skibidi sussy browser windows to free up dedotated WAM",
+  "homepage_url": "https://github.com/osmannyildiz/osirizz",
+  "permissions": ["storage", "tabs"],
   "browser_action": {
-    "default_popup": "popup/popup.html",
+    "default_popup": "ui/popup.html",
     "default_icon": {
-      "48": "icons/tabberfox-48.png",
-      "96": "icons/tabberfox-96.png"
+      "32": "icons/icon-32px.png",
+      "64": "icons/icon-64px.png"
     }
   },
   "icons": {
-    "48": "icons/tabberfox-48.png",
-    "96": "icons/tabberfox-96.png"
+    "32": "icons/icon-32px.png",
+    "64": "icons/icon-64px.png"
   },
   "web_accessible_resources": ["popup/*"],
   "background": {
