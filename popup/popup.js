@@ -202,36 +202,25 @@ async function deleteWindow(windowId) {
 }
 
 async function restoreWindow(windowId, windowData) {
-  try {
-    // Create new window with first tab
-    const firstTab = windowData.tabs[0];
-    const newWindow = await browser.windows.create({
-      url: firstTab.url,
-    });
+  // let sendingMessage = browser.runtime.sendMessage({
+  //   type: "restoreWindow",
+  //   windowId: windowId,
+  //   windowData: windowData,
+  // });
+  // sendingMessage.then((result) => {
+  //   console.log("hey sendingMessage result", result);
+  // });
 
-    // Create remaining tabs in the window (discarded until activated)
-    const remainingTabs = windowData.tabs.slice(1);
-    for (const tab of remainingTabs) {
-      await browser.tabs.create({
-        windowId: newWindow.id,
-        url: tab.url,
-        active: false,
-        discarded: true,
-        title: tab.title,
-      });
-    }
+  // let result = await browser.runtime.sendMessage({
+  //   type: "restoreWindow",
+  //   windowId: windowId,
+  //   windowData: windowData,
+  // });
+  // console.log("hey restoreWindow result", result);
 
-    // Remove the saved window from storage
-    const { savedWindows = {} } = await browser.storage.local.get(
-      "savedWindows"
-    );
-    delete savedWindows[windowId];
-    await browser.storage.local.set({ savedWindows });
-
-    // Refresh the displayed list
-    loadSavedWindows();
-  } catch (error) {
-    console.error("Error restoring window:", error);
-    showMessage("Error restoring window", "error");
-  }
+  await browser.runtime.sendMessage({
+    type: "restoreWindow",
+    windowId: windowId,
+    windowData: windowData,
+  });
 }

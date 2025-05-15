@@ -15,5 +15,8 @@
     "48": "icons/tabberfox-48.png",
     "96": "icons/tabberfox-96.png"
   },
-  "web_accessible_resources": ["popup/*"]
+  "web_accessible_resources": ["popup/*"],
+  "background": {
+    "scripts": ["background.js"]
+  }
 }
