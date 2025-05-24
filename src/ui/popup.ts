@@ -1,5 +1,6 @@
-let activeFilter = null;
+import browser from "webextension-polyfill";
 
+// Constants
 const colorEmojis = {
   red: "🔴",
   orange: "🟠",
@@ -9,24 +10,30 @@ const colorEmojis = {
   purple: "🟣",
 };
 
+// Types
+type ColorFilter = keyof typeof colorEmojis;
+
+// State
+let activeFilter: ColorFilter | null = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   // Load saved windows when popup opens
   loadSavedWindows();
 
   // Add event listener for save button
   document
-    .getElementById("save-window-btn")
+    .getElementById("save-window-btn")!
     .addEventListener("click", saveCurrentWindow);
 
   // Add event listener for open in tab button
   document
-    .getElementById("open-tab-btn")
+    .getElementById("open-tab-btn")!
     .addEventListener("click", openInNewTab);
 
   // Add event listeners for color filters
   document.querySelectorAll(".color-filter").forEach((button) => {
     button.addEventListener("click", () => {
-      const color = button.dataset.color;
+      const color = (button as HTMLButtonElement).dataset.color as ColorFilter;
       if (activeFilter === color) {
         // Deactivate filter if clicking active one
         activeFilter = null;
@@ -35,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Remove active class from previous filter
         if (activeFilter) {
           document
-            .querySelector(`.color-filter[data-color="${activeFilter}"]`)
+            .querySelector(`.color-filter[data-color="${activeFilter}"]`)!
             .classList.remove("active");
         }
         // Activate new filter
@@ -66,14 +73,14 @@ async function openInNewTab() {
   }
 }
 
-function showMessage(text, type) {
-  const messageEl = document.getElementById("message");
+function showMessage(text: string, type: "error") {
+  const messageEl = document.getElementById("message")!;
   messageEl.textContent = text;
   messageEl.className = `message ${type}`;
 }
 
 function clearMessage() {
-  const messageEl = document.getElementById("message");
+  const messageEl = document.getElementById("message")!;
   messageEl.textContent = "";
   messageEl.className = "message";
 }
@@ -84,11 +91,15 @@ async function saveCurrentWindow() {
     const currentWindow = await browser.windows.getCurrent({ populate: true });
 
     // Get tab information (excluding about: URLs)
+    if (!currentWindow.tabs) throw new Error("No tabs found in current window");
     const tabsData = currentWindow.tabs
-      .filter((tab) => !tab.url.startsWith("about:"))
+      .filter((tab) => {
+        if (!tab.url) throw new Error("No URL found in tab");
+        return !tab.url.startsWith("about:");
+      })
       .map((tab) => ({
-        url: tab.url,
-        title: tab.title,
+        url: tab.url!,
+        title: tab.title || "Untitled",
       }));
 
     if (tabsData.length === 0) {
@@ -97,27 +108,29 @@ async function saveCurrentWindow() {
     }
 
     // Use first tab's title as window name
-    const windowName = tabsData[0].title;
+    const windowName = tabsData[0].title || "Untitled";
 
     // Generate unique ID for the window
     const windowId = crypto.randomUUID();
 
     // Get existing saved windows
-    const { savedWindows = {} } = await browser.storage.local.get(
+    const { savedWindows = {} } = (await browser.storage.local.get(
       "savedWindows"
-    );
+    )) as { savedWindows: Record<string, SavedWindow> };
 
     // Save new window data
     savedWindows[windowId] = {
       name: windowName,
-      tabs: tabsData,
       timestamp: new Date().toISOString(),
+      tabs: tabsData,
     };
 
     // Store updated data
     await browser.storage.local.set({ savedWindows });
 
     // Close current window
+    if (typeof currentWindow.id !== "number")
+      throw new Error("No window ID found");
     await browser.windows.remove(currentWindow.id);
   } catch (error) {
     console.error("Error saving window:", error);
@@ -127,10 +140,10 @@ async function saveCurrentWindow() {
 
 async function loadSavedWindows() {
   try {
-    const { savedWindows = {} } = await browser.storage.local.get(
+    const { savedWindows = {} } = (await browser.storage.local.get(
       "savedWindows"
-    );
-    const windowsList = document.getElementById("windows-list");
+    )) as { savedWindows: Record<string, SavedWindow> };
+    const windowsList = document.getElementById("windows-list")!;
     windowsList.innerHTML = "";
 
     // Filter windows based on active color filter
@@ -180,12 +193,12 @@ async function loadSavedWindows() {
   }
 }
 
-async function deleteWindow(windowId) {
+async function deleteWindow(windowId: string) {
   try {
     // Get existing saved windows
-    const { savedWindows = {} } = await browser.storage.local.get(
+    const { savedWindows = {} } = (await browser.storage.local.get(
       "savedWindows"
-    );
+    )) as { savedWindows: Record<string, SavedWindow> };
 
     // Remove the window
     delete savedWindows[windowId];
@@ -201,7 +214,7 @@ async function deleteWindow(windowId) {
   }
 }
 
-async function restoreWindow(windowId, windowData) {
+async function restoreWindow(windowId: string, windowData: SavedWindow) {
   await browser.runtime.sendMessage({
     type: "restoreWindow",
     windowId: windowId,
