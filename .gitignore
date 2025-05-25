@@ -1,2 +1,5 @@
 node_modules/
 extension/dist/
+extension/web-ext-artifacts/
+extension/.amo-upload-uuid
+extension/.web-extension-id

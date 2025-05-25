@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "node build.mjs",
-    "dev": "cd extension && web-ext run --firefox=\"/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox\""
+    "dev": "cd extension && web-ext run --firefox=\"/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox\"",
+    "package": "cd extension && web-ext build --overwrite-dest"
   },
   "keywords": [],
   "author": "",
