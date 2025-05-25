@@ -10,13 +10,21 @@ declare global {
     tabs: SavedWindowTab[];
   }
 
+  type SavedWindowId = string;
+
+  type SavedWindows = Record<SavedWindowId, SavedWindow>;
+
+  interface ExportDataMessage {
+    type: "exportData";
+  }
+
   interface RestoreWindowMessage {
     type: "restoreWindow";
-    windowId: string;
+    windowId: SavedWindowId;
     windowData: SavedWindow;
   }
 
-  type Message = RestoreWindowMessage;
+  type Message = ExportDataMessage | RestoreWindowMessage;
 }
 
 export {};

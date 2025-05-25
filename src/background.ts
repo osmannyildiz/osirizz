@@ -1,6 +1,20 @@
 import browser from "webextension-polyfill";
+import { getSavedWindows, setSavedWindows } from "./utils/data";
+import { downloadJsonFile } from "./utils/misc";
 
-async function restoreWindow(windowId: string, windowData: SavedWindow) {
+async function exportData() {
+  const savedWindows = await getSavedWindows();
+
+  const dateStr = new Date()
+    .toISOString()
+    .replace(/[:.]/g, "-")
+    .replace("T", "_")
+    .slice(0, 19);
+
+  downloadJsonFile(`osirizz_${dateStr}.json`, savedWindows);
+}
+
+async function restoreWindow(windowId: SavedWindowId, windowData: SavedWindow) {
   // Create new window with first tab
   const firstTab = windowData.tabs[0];
   const newWindow = await browser.windows.create({
@@ -20,11 +34,9 @@ async function restoreWindow(windowId: string, windowData: SavedWindow) {
   }
 
   // Remove the saved window from storage
-  const { savedWindows = {} } = (await browser.storage.local.get(
-    "savedWindows"
-  )) as { savedWindows: Record<string, SavedWindow> };
+  const savedWindows = await getSavedWindows();
   delete savedWindows[windowId];
-  await browser.storage.local.set({ savedWindows });
+  await setSavedWindows(savedWindows);
 
   // The popup will close, so no need to bother updating the UI
 }
@@ -32,11 +44,14 @@ async function restoreWindow(windowId: string, windowData: SavedWindow) {
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const msg = message as Message;
   switch (msg.type) {
+    case "exportData":
+      exportData();
+      break;
     case "restoreWindow":
       restoreWindow(msg.windowId, msg.windowData);
       break;
     default:
-      throw new Error(`Unknown message type: ${msg.type}`);
+      throw new Error("Unknown message type");
   }
   return true;
 });

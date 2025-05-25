@@ -1,4 +1,5 @@
 import browser from "webextension-polyfill";
+import { getSavedWindows, setSavedWindows } from "../utils/data";
 
 // Constants
 const colorEmojis = {
@@ -17,15 +18,14 @@ type ColorFilter = keyof typeof colorEmojis;
 let activeFilter: ColorFilter | null = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Load saved windows when popup opens
   loadSavedWindows();
 
-  // Add event listener for save button
   document
     .getElementById("save-window-btn")!
     .addEventListener("click", saveCurrentWindow);
 
-  // Add event listener for open in tab button
+  document.getElementById("export-btn")!.addEventListener("click", exportData);
+
   document
     .getElementById("open-tab-btn")!
     .addEventListener("click", openInNewTab);
@@ -53,6 +53,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+async function exportData() {
+  browser.runtime.sendMessage({
+    type: "exportData",
+  });
+
+  // Close the popup
+  window.close();
+}
 
 async function openInNewTab() {
   try {
@@ -113,10 +122,7 @@ async function saveCurrentWindow() {
     // Generate unique ID for the window
     const windowId = crypto.randomUUID();
 
-    // Get existing saved windows
-    const { savedWindows = {} } = (await browser.storage.local.get(
-      "savedWindows"
-    )) as { savedWindows: Record<string, SavedWindow> };
+    const savedWindows = await getSavedWindows();
 
     // Save new window data
     savedWindows[windowId] = {
@@ -125,8 +131,7 @@ async function saveCurrentWindow() {
       tabs: tabsData,
     };
 
-    // Store updated data
-    await browser.storage.local.set({ savedWindows });
+    await setSavedWindows(savedWindows);
 
     // Close current window
     if (typeof currentWindow.id !== "number")
@@ -140,9 +145,8 @@ async function saveCurrentWindow() {
 
 async function loadSavedWindows() {
   try {
-    const { savedWindows = {} } = (await browser.storage.local.get(
-      "savedWindows"
-    )) as { savedWindows: Record<string, SavedWindow> };
+    const savedWindows = await getSavedWindows();
+
     const windowsList = document.getElementById("windows-list")!;
     windowsList.innerHTML = "";
 
@@ -193,18 +197,14 @@ async function loadSavedWindows() {
   }
 }
 
-async function deleteWindow(windowId: string) {
+async function deleteWindow(windowId: SavedWindowId) {
   try {
-    // Get existing saved windows
-    const { savedWindows = {} } = (await browser.storage.local.get(
-      "savedWindows"
-    )) as { savedWindows: Record<string, SavedWindow> };
+    const savedWindows = await getSavedWindows();
 
     // Remove the window
     delete savedWindows[windowId];
 
-    // Update storage
-    await browser.storage.local.set({ savedWindows });
+    await setSavedWindows(savedWindows);
 
     // Refresh the displayed list
     loadSavedWindows();
@@ -214,10 +214,10 @@ async function deleteWindow(windowId: string) {
   }
 }
 
-async function restoreWindow(windowId: string, windowData: SavedWindow) {
+async function restoreWindow(windowId: SavedWindowId, windowData: SavedWindow) {
   await browser.runtime.sendMessage({
     type: "restoreWindow",
-    windowId: windowId,
-    windowData: windowData,
+    windowId,
+    windowData,
   });
 }
