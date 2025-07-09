@@ -157,6 +157,16 @@ async function loadSavedWindows() {
       return data.name.startsWith(emoji);
     });
 
+    // Sort windows by timestamp, most recently saved first
+    entries.sort((a, b) => {
+      const aValue = a[1];
+      const bValue = b[1];
+      return (
+        new Date(bValue.timestamp).getTime() -
+        new Date(aValue.timestamp).getTime()
+      );
+    });
+
     entries.forEach(([id, data]) => {
       const windowItem = document.createElement("div");
       windowItem.className = "window-item";
